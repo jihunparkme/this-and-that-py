@@ -76,17 +76,17 @@ def fetch_financial_highlight(stock_code):
 			data[indicator] = values[:4]
 	return {"years": years[:4], "data": data}
 
-def fetch_multiple_stocks(stock_codes):
+def fetch_multiple_stocks(stock_codes_dict):
 	result = {}
-	for code in stock_codes:
+	for code in stock_codes_dict:
 		data = fetch_financial_highlight(code)
 		result[code] = data
 	return result
 
-def print_tsv(stock_codes):
-	indicators = ["ROA", "ROE", "EPS", "BPS", "DPS", "PER", "PBR", "배당수익률"]
-	result = fetch_multiple_stocks(stock_codes)
-	for code in stock_codes:
+def print_tsv(stock_codes_dict):
+	indicators = ["ROA", "ROE", "PER", "PBR", "배당수익률", "EPS", "DPS", "BPS"]
+	result = fetch_multiple_stocks(stock_codes_dict)
+	for code, name in stock_codes_dict.items():
 		item = result.get(code)
 		if not item:
 			continue
@@ -94,16 +94,23 @@ def print_tsv(stock_codes):
 		data = item["data"]
 		if not years:
 			continue
-		# 헤더: 종목코드\t지표\t연도1\t연도2 ...
-		header = ["종목코드", "지표"] + years
+		# 헤더: 종목코드\t종목명\t지표\t연도1\t연도2 ...
+		header = ["종목코드", "종목명", "지표"] + years
 		print("\t".join(header))
 		for ind in indicators:
-			row = [code, ind]
+			row = [code, name, ind]
 			val_list = data.get(ind, [])
 			for i in range(len(years)):
 				row.append(val_list[i] if i < len(val_list) else "")
 			print("\t".join(row))
 
 if __name__ == "__main__":
-	stock_codes = ["086790", "005380", "316140", "000810", "000270", "005830"]
+	stock_codes = {
+		"086790": "하나금융지주",
+		"005380": "현대차",
+		"316140": "우리금융지주",
+		"000810": "삼성화재",
+		"000270": "기아",
+		"005830": "DB손해보험"
+	}
 	print_tsv(stock_codes)
